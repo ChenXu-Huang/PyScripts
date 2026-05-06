@@ -381,12 +381,12 @@ class _ThemeManager(QObject):
         self._tokens = _DARK_TOKENS if dark else _LIGHT_TOKENS
         self._diff = _DARK_DIFF if dark else _LIGHT_DIFF
         app = QApplication.instance()
-        if app:
+        if isinstance(app, QApplication):
             app.setStyleSheet(stylesheet(self._tokens))
         self.changed.emit(self._tokens)
 
     def init_system_dark(self) -> None:
-        self._sys_dark = QApplication.palette().color(QPalette.Window).lightness() < 128
+        self._sys_dark = QApplication.palette().color(QPalette.ColorRole.Window).lightness() < 128
 
     def _resolve_dark(self) -> bool:
         if self._mode == self.THEME_DARK:

@@ -13,7 +13,7 @@ def launch_gui() -> NoReturn:
 
     app = QApplication(sys.argv)
     app.setApplicationName("ToolBox")
-    app.setAttribute(Qt.AA_UseHighDpiPixmaps)
+    app.setAttribute(Qt.ApplicationAttribute.AA_UseHighDpiPixmaps)
     win = MainWindow()
     win.show()
     sys.exit(app.exec())

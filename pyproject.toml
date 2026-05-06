@@ -26,12 +26,3 @@ python_version = "3.13"
 warn_unused_configs = true
 pretty = true
 ignore_missing_imports = true
-
-[[tool.mypy.overrides]]
-module = "src.gui.*"
-disable_error_code = [
-    "attr-defined",
-    "union-attr",
-    "method-assign",
-    "arg-type",
-]

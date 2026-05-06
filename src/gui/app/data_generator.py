@@ -110,15 +110,14 @@ class _StatsBar(QWidget):
     @staticmethod
     def _make_stat(text: str) -> QLabel:
         lbl = QLabel(text)
-        lbl.setTextFormat(Qt.RichText)
+        lbl.setTextFormat(Qt.TextFormat.RichText)
         lbl.setStyleSheet("font-size: 13px; background: transparent;")
         return lbl
 
     def _clear(self) -> None:
         while self._row.count():
             item = self._row.takeAt(0)
-            w = item.widget()
-            if w:
+            if item and (w := item.widget()):
                 w.deleteLater()
 
     def update_stats(self, data: np.ndarray) -> None:

@@ -10,13 +10,21 @@ from .i18n import tr
 class TabItem:
     """Data holder for a single tab."""
 
-    def __init__(self, tool_id: str, name: str, widget) -> None:
+    def __init__(
+        self,
+        tool_id: str,
+        name: str,
+        widget: QWidget,
+        btn: QPushButton,
+        close_btn: QPushButton,
+        wrapper: QWidget,
+    ) -> None:
         self.tool_id = tool_id
         self.name = name
         self.widget = widget
-        self.btn: QPushButton | None = None
-        self.close_btn: QPushButton | None = None
-        self.wrapper: QWidget | None = None
+        self.btn = btn
+        self.close_btn = close_btn
+        self.wrapper = wrapper
 
 
 class TabBar(QWidget):
@@ -34,8 +42,8 @@ class TabBar(QWidget):
         self._row.setSpacing(4)
         self._row.addStretch(1)
 
-    def add_tab(self, item: TabItem) -> None:
-        btn = QPushButton(item.name)
+    def add_tab(self, tool_id: str, name: str, widget) -> TabItem:
+        btn = QPushButton(name)
         btn.setObjectName("TabBtn")
         btn.setCheckable(True)
         btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
@@ -53,19 +61,30 @@ class TabBar(QWidget):
         wl.addWidget(btn)
         wl.addWidget(close_btn)
 
-        idx = len(self._tabs)
-        item.btn, item.close_btn, item.wrapper = btn, close_btn, wrapper
+        item = TabItem(tool_id, name, widget, btn, close_btn, wrapper)
         self._tabs.append(item)
         self._row.insertWidget(self._row.count() - 1, wrapper)
 
-        btn.clicked.connect(lambda _, i=idx: self.tab_changed.emit(i))
-        close_btn.clicked.connect(lambda _, i=idx: self.tab_closed.emit(i))
-        self.set_active(idx)
+        btn.clicked.connect(lambda: self._handle_tab_click(item))
+        close_btn.clicked.connect(lambda: self._handle_tab_close(item))
+        self.set_active(len(self._tabs) - 1)
+        return item
+
+    def _handle_tab_click(self, item: TabItem) -> None:
+        try:
+            self.tab_changed.emit(self._tabs.index(item))
+        except ValueError:
+            pass
+
+    def _handle_tab_close(self, item: TabItem) -> None:
+        try:
+            self.tab_closed.emit(self._tabs.index(item))
+        except ValueError:
+            pass
 
     def set_active(self, idx: int) -> None:
         for i, t in enumerate(self._tabs):
-            if t.btn:
-                t.btn.setChecked(i == idx)
+            t.btn.setChecked(i == idx)
 
     def remove_tab(self, idx: int) -> None:
         if not (0 <= idx < len(self._tabs)):
@@ -73,14 +92,6 @@ class TabBar(QWidget):
         item = self._tabs.pop(idx)
         self._row.removeWidget(item.wrapper)
         item.wrapper.deleteLater()
-        for i, t in enumerate(self._tabs):
-            try:
-                t.btn.clicked.disconnect()
-                t.close_btn.clicked.disconnect()
-            except Exception:
-                pass
-            t.btn.clicked.connect(lambda _, ii=i: self.tab_changed.emit(ii))
-            t.close_btn.clicked.connect(lambda _, ii=i: self.tab_closed.emit(ii))
 
     def count(self) -> int:
         return len(self._tabs)

@@ -1,7 +1,7 @@
 """Home page showing tool cards in a responsive grid."""
 
 from PySide6.QtWidgets import (
-    QWidget, QVBoxLayout, QHBoxLayout, QLabel, QScrollArea,
+    QWidget, QVBoxLayout, QHBoxLayout, QGridLayout, QLabel, QScrollArea,
     QFrame, QSizePolicy,
 )
 from PySide6.QtCore import Qt, Signal
@@ -28,7 +28,7 @@ class ToolCard(QFrame):
         self.tool = tool
         self.setObjectName("ToolCard")
         self.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
-        self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
         self.setMinimumHeight(90)
         self._build()
         language_changed.connect(self._retranslate)
@@ -100,27 +100,23 @@ class HomePage(QWidget):
 
         scroll = QScrollArea()
         scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QFrame.NoFrame)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         grid_w = QWidget()
-        grid = QVBoxLayout(grid_w)
+        grid = QGridLayout(grid_w)
         grid.setSpacing(12)
         grid.setContentsMargins(0, 0, 8, 0)
 
-        row_layout = None
         for i, tool in enumerate(GUI_TOOLS):
-            if i % 2 == 0:
-                row_layout = QHBoxLayout()
-                row_layout.setSpacing(12)
-                grid.addLayout(row_layout)
             card = ToolCard(tool)
             card.clicked.connect(self.tool_opened)
-            row_layout.addWidget(card)
-        if len(GUI_TOOLS) % 2 != 0:
-            row_layout.addWidget(QWidget())
+            grid.addWidget(card, i // 2, i % 2)
 
-        grid.addStretch(1)
+        grid.setRowStretch((len(GUI_TOOLS) + 1) // 2, 1)
+        grid.setColumnStretch(0, 1)
+        grid.setColumnStretch(1, 1)
+
         scroll.setWidget(grid_w)
         outer.addWidget(scroll, 1)
 

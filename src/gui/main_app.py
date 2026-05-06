@@ -8,7 +8,7 @@ from PySide6.QtCore import Qt
 from PySide6.QtGui import QCursor
 
 from .home import HomePage
-from .tabs import TabBar, TabItem
+from .tabs import TabBar
 from .tool_page import ToolPage
 from .app import GUI_TOOLS
 from .i18n import tr, set_language, language_changed, available_languages
@@ -116,7 +116,7 @@ class MainWindow(QMainWindow):
         menu.addSeparator()
         for tool in GUI_TOOLS:
             a = menu.addAction(f"{tool['icon']}  ...")
-            a._tool = tool
+            a.setData(tool)
             a.triggered.connect(lambda _, t=tool: self._open_tool(t))
         self._tool_menu = menu
         self._menu_btn.setMenu(menu)
@@ -125,7 +125,7 @@ class MainWindow(QMainWindow):
         menu = QMenu(self)
         for mode in (THEME_SYSTEM, THEME_LIGHT, THEME_DARK):
             a = menu.addAction("")
-            a._theme_mode = mode
+            a.setData(mode)
             a.triggered.connect(lambda _, m=mode: self._set_theme(m))
         self._theme_menu = menu
         self._theme_btn.setMenu(menu)
@@ -135,7 +135,7 @@ class MainWindow(QMainWindow):
         menu = QMenu(self)
         for locale, _ in available_languages():
             a = menu.addAction("")
-            a._locale = locale
+            a.setData(locale)
             a.triggered.connect(lambda _, lc=locale: set_language(lc))
         self._lang_menu = menu
         self._lang_btn.setMenu(menu)
@@ -151,9 +151,8 @@ class MainWindow(QMainWindow):
         if tool_actions:
             tool_actions[0].setText(tr("topbar.home"))
         for a in self._tool_menu.actions():
-            if not a.isSeparator() and hasattr(a, "_tool"):
-                tid = a._tool["id"]
-                a.setText(f"{a._tool['icon']}  {tr(f'tool.{tid}.name')}")
+            if not a.isSeparator() and isinstance(tool := a.data(), dict):
+                a.setText(f"{tool['icon']}  {tr(f'tool.{tool["id"]}.name')}")
 
         theme_labels = {
             THEME_SYSTEM: f"{_THEME_ICONS[THEME_SYSTEM]}  {tr('theme.system')}",
@@ -161,19 +160,20 @@ class MainWindow(QMainWindow):
             THEME_DARK: f"{_THEME_ICONS[THEME_DARK]}  {tr('theme.dark')}",
         }
         for a in self._theme_menu.actions():
-            if hasattr(a, "_theme_mode"):
-                a.setText(theme_labels[a._theme_mode])
+            mode = a.data()
+            if isinstance(mode, str) and mode in theme_labels:
+                a.setText(theme_labels[mode])
 
         lang_map = dict(available_languages())
         for a in self._lang_menu.actions():
-            if hasattr(a, "_locale"):
-                a.setText(lang_map.get(a._locale, a._locale))
+            if isinstance(locale := a.data(), str):
+                a.setText(lang_map.get(locale, locale))
 
         tool_map = {t["id"]: t for t in GUI_TOOLS}
         for i in range(self._tab_bar.count()):
             item = self._tab_bar.tab_at(i)
             tool = tool_map.get(item.tool_id)
-            if tool and item.btn:
+            if tool:
                 item.btn.setText(f"{tool['icon']} {tr(f'tool.{item.tool_id}.name')}")
 
     # ── Tool opening ─────────────────────────────────────────────────
@@ -188,8 +188,7 @@ class MainWindow(QMainWindow):
         page = ToolPage(tool)
         stack_idx = self._stack.addWidget(page)
         self._open_tools[tid] = stack_idx
-        tab_item = TabItem(tid, f"{tool['icon']} {tr(f'tool.{tid}.name')}", page)
-        self._tab_bar.add_tab(tab_item)
+        self._tab_bar.add_tab(tid, f"{tool['icon']} {tr(f'tool.{tid}.name')}", page)
         self._stack.setCurrentIndex(stack_idx)
         self._sync_tab_for_stack(stack_idx)
 
@@ -212,10 +211,10 @@ class MainWindow(QMainWindow):
     def _on_tab_closed(self, tab_idx: int) -> None:
         item = self._tab_bar.tab_at(tab_idx)
         for si in range(self._stack.count()):
-            if self._stack.widget(si) is item.widget:
-                w = self._stack.widget(si)
+            if (w := self._stack.widget(si)) is item.widget:
                 self._stack.removeWidget(w)
-                w.deleteLater()
+                if w is not None:
+                    w.deleteLater()
                 break
         self._open_tools.pop(item.tool_id, None)
         self._tab_bar.remove_tab(tab_idx)

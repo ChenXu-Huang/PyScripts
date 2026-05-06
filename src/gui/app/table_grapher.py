@@ -9,7 +9,7 @@ from PySide6.QtWidgets import (
     QComboBox, QCheckBox, QFrame, QScrollArea, QProgressBar,
     QSplitter, QSizePolicy,
 )
-from PySide6.QtCore import Qt, Signal, QObject
+from PySide6.QtCore import Qt, Signal, QEvent, QObject
 from PySide6.QtGui import QCursor, QPixmap, QFont
 
 from ..i18n import tr, language_changed
@@ -80,8 +80,8 @@ class _ImageBlock(QFrame):
 
         self._header = QFrame()
         self._header.setObjectName("FileBlockHeader")
-        self._header.setCursor(QCursor(Qt.PointingHandCursor))
-        self._header.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+        self._header.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
+        self._header.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
         hrow = QHBoxLayout(self._header)
         hrow.setContentsMargins(12, 8, 14, 8)
@@ -89,7 +89,7 @@ class _ImageBlock(QFrame):
 
         self._chevron = QLabel("▾")
         self._name_lbl = QLabel(f"<b style='color:{d.file_accent};'>{image_path.name}</b>")
-        self._name_lbl.setTextFormat(Qt.RichText)
+        self._name_lbl.setTextFormat(Qt.TextFormat.RichText)
         self._name_lbl.setFont(_MONO_FONT)
         self._name_lbl.setStyleSheet("background: transparent;")
 
@@ -104,12 +104,12 @@ class _ImageBlock(QFrame):
         body_v.setSpacing(0)
 
         self._image_lbl = QLabel()
-        self._image_lbl.setAlignment(Qt.AlignCenter)
+        self._image_lbl.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._load_thumbnail()
         body_v.addWidget(self._image_lbl)
 
         outer.addWidget(self._body)
-        self._header.mousePressEvent = lambda _e: self._toggle()
+        self._header.installEventFilter(self)
         self._apply_theme()
         theme_manager.changed.connect(self._apply_theme)
 
@@ -118,7 +118,7 @@ class _ImageBlock(QFrame):
         if not pixmap.isNull():
             max_w = min(pixmap.width(), 600)
             max_h = min(pixmap.height(), 400)
-            self._image_lbl.setPixmap(pixmap.scaled(max_w, max_h, Qt.KeepAspectRatio, Qt.SmoothTransformation))
+            self._image_lbl.setPixmap(pixmap.scaled(max_w, max_h, Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation))
 
     def _apply_theme(self, _tokens=None) -> None:
         d = theme_manager.diff
@@ -128,6 +128,12 @@ class _ImageBlock(QFrame):
             f"  border-bottom: 1px solid {d.file_accent}44;}}"
         )
         self._chevron.setStyleSheet(f"color: {d.file_accent}; font-size: 13px; background: transparent;")
+
+    def eventFilter(self, obj, event) -> bool:
+        if obj is self._header and event.type() == QEvent.Type.MouseButtonPress:
+            self._toggle()
+            return True
+        return super().eventFilter(obj, event)
 
     def _toggle(self) -> None:
         visible = not self._body.isVisible()
@@ -141,8 +147,8 @@ class _ResultView(QScrollArea):
     def __init__(self, parent=None) -> None:
         super().__init__(parent)
         self.setWidgetResizable(True)
-        self.setFrameShape(QFrame.NoFrame)
-        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.setFrameShape(QFrame.Shape.NoFrame)
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAsNeeded)
 
         self._container = QWidget()
         self._container.setStyleSheet("background: transparent;")
@@ -151,7 +157,7 @@ class _ResultView(QScrollArea):
         self._vb.setSpacing(8)
 
         self._empty = QLabel()
-        self._empty.setAlignment(Qt.AlignCenter)
+        self._empty.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self._empty.setStyleSheet("color: palette(mid); font-size: 13px;")
         self._vb.addWidget(self._empty)
         self._vb.addStretch(1)
@@ -171,8 +177,8 @@ class _ResultView(QScrollArea):
     def clear(self) -> None:
         while self._vb.count() > 2:
             item = self._vb.takeAt(1)
-            if item and item.widget():
-                item.widget().deleteLater()
+            if item and (w := item.widget()):
+                w.deleteLater()
         self._empty.setVisible(True)
 
     def retranslate(self) -> None:
@@ -198,7 +204,7 @@ class _StatsBar(QWidget):
 
     def _make_stat(self) -> QLabel:
         lbl = QLabel()
-        lbl.setTextFormat(Qt.RichText)
+        lbl.setTextFormat(Qt.TextFormat.RichText)
         lbl.setStyleSheet("font-size: 13px; background: transparent;")
         return lbl
 
@@ -228,17 +234,17 @@ class ToolWidget(QWidget):
         root.setContentsMargins(0, 0, 0, 0)
         root.setSpacing(16)
 
-        splitter = QSplitter(Qt.Horizontal)
+        splitter = QSplitter(Qt.Orientation.Horizontal)
         splitter.setHandleWidth(1)
         splitter.setStyleSheet("QSplitter::handle { background: palette(mid); }")
 
         left_scroll = QScrollArea()
         left_scroll.setWidgetResizable(True)
-        left_scroll.setFrameShape(QFrame.NoFrame)
-        left_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        left_scroll.setFrameShape(QFrame.Shape.NoFrame)
+        left_scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
         left_w = QWidget()
-        left_w.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        left_w.setSizePolicy(QSizePolicy.Policy.Preferred, QSizePolicy.Policy.Preferred)
         lv = QVBoxLayout(left_w)
         lv.setContentsMargins(0, 0, 12, 0)
         lv.setSpacing(14)
@@ -263,7 +269,7 @@ class ToolWidget(QWidget):
         opts_v.setSpacing(10)
         self._opt_label = SectionLabel()
         self._chk_plot_together = QCheckBox()
-        self._chk_plot_together.setCursor(QCursor(Qt.PointingHandCursor))
+        self._chk_plot_together.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         opts_v.addWidget(self._opt_label)
         opts_v.addWidget(self._chk_plot_together)
         lv.addWidget(opts_frame)
@@ -274,12 +280,12 @@ class ToolWidget(QWidget):
         self._run_btn = QPushButton()
         self._run_btn.setObjectName("RunBtn")
         self._run_btn.setMinimumHeight(40)
-        self._run_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        self._run_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self._run_btn.clicked.connect(self._on_run)
         self._clear_btn = QPushButton()
         self._clear_btn.setObjectName("MenuBtn")
         self._clear_btn.setMinimumHeight(40)
-        self._clear_btn.setCursor(QCursor(Qt.PointingHandCursor))
+        self._clear_btn.setCursor(QCursor(Qt.CursorShape.PointingHandCursor))
         self._clear_btn.clicked.connect(self._on_clear)
         btn_row.addWidget(self._run_btn, 2)
         btn_row.addWidget(self._clear_btn, 1)
@@ -338,7 +344,7 @@ class ToolWidget(QWidget):
 
     def _make_divider(self) -> QFrame:
         line = QFrame()
-        line.setFrameShape(QFrame.HLine)
+        line.setFrameShape(QFrame.Shape.HLine)
         line.setStyleSheet("color: palette(mid);")
         line.setFixedHeight(1)
         return line
