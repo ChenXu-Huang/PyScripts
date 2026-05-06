@@ -1,0 +1,9 @@
+{
+    "regex_replacer": {
+        "pattern": [],
+        "replacement": []
+    },
+    "table_grapher": {
+        "data_path": []
+    }
+}

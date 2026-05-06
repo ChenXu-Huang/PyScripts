@@ -1,0 +1,15 @@
+{
+    "language": "zh_CN",
+    "theme": "system",
+    "regex_replacer": {
+        "ignore_case": false,
+        "backup": false
+    },
+    "table_grapher": {
+        "mode": "smooth",
+        "plot_together": true
+    },
+    "data_generator": {
+        "distribution": "normal"
+    }
+}

@@ -1,0 +1,37 @@
+[project]
+name = "pyscripts"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "matplotlib>=3.10.8",
+    "pandas>=3.0.2",
+    "pyside6>=6.11.0",
+    "scipy>=1.17.1",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.20.2",
+    "nuitka>=4.0.8",
+    "pytest>=9.0.3",
+]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+
+[tool.mypy]
+python_version = "3.13"
+warn_unused_configs = true
+pretty = true
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "src.gui.*"
+disable_error_code = [
+    "attr-defined",
+    "union-attr",
+    "method-assign",
+    "arg-type",
+]
