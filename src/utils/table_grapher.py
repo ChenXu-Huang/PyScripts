@@ -69,7 +69,8 @@ def _plot_single_line(ax: Axes, x_data: np.ndarray, y_data: np.ndarray, var_name
 def _setup_axes(ax: Axes, x_var: str, y_label: str) -> None:
     ax.set_xlabel(x_var, fontsize=12)
     ax.set_ylabel(y_label, fontsize=12)
-    ax.legend()
+    if ax.get_legend_handles_labels()[0]:
+        ax.legend()
     ax.grid(True)
     plt.tight_layout()
 
