@@ -8,6 +8,7 @@ from PySide6.QtCore import Qt, Signal
 from PySide6.QtGui import QCursor
 from PySide6.QtSvgWidgets import QSvgWidget
 
+from . import ASSETS_DIR
 from .i18n import tr, language_changed
 from .app import GUI_TOOLS
 
@@ -58,7 +59,7 @@ class ToolCard(QFrame):
         col.addWidget(self._desc)
         row.addLayout(col, 1)
 
-        self._arrow = _svg_widget("assets/chevron-right.svg", 18)
+        self._arrow = _svg_widget(str(ASSETS_DIR / "chevron-right.svg"), 18)
         row.addWidget(self._arrow)
 
         self._retranslate()

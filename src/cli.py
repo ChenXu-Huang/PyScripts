@@ -7,10 +7,12 @@ import logging
 from typing import Callable
 from pathlib import Path
 
+from . import ROOT_DIR
+
 
 def _build_replace(sub: argparse._SubParsersAction) -> None:
     p = sub.add_parser("replace", help="Batch regex find/replace in a folder")
-    p.add_argument("--folder", type=Path, default=Path("data"), help="Root folder to scan recursively (default: %(default)s)")
+    p.add_argument("--folder", type=Path, default=ROOT_DIR / "data", help="Root folder to scan recursively (default: %(default)s)")
     p.add_argument("--pattern", required=True, help="Regex search pattern (Python syntax)")
     p.add_argument("--replacement", default="", help="Replacement string, supports backreferences \\1, \\2, ... (default: '%(default)s')")
     p.add_argument("--ext", action="append", default=None, help="Filter by file extension, repeatable (e.g. --ext py --ext txt). Skip to process all files")
@@ -72,7 +74,7 @@ def _run_generate(args: argparse.Namespace) -> int:
     from .utils import data_generator as dg
 
     rng = np.random.default_rng(args.seed)
-    csv_path = args.csv or Path("data/random_data.csv")
+    csv_path = args.csv or ROOT_DIR / "data/random_data.csv"
     data = dg.generate_data(
         n=args.n,
         mean=args.mean,
@@ -103,7 +105,7 @@ _CLI_TOOLS: list[tuple[str, str, Callable[..., None], Callable[..., int]]] = [
 def _get_version() -> str:
     import tomllib
 
-    pyproject = Path(__file__).resolve().parent.parent / "pyproject.toml"
+    pyproject = ROOT_DIR / "pyproject.toml"
     try:
         with open(pyproject, "rb") as f:
             return tomllib.load(f)["project"]["version"]
@@ -139,7 +141,7 @@ def run_cli(argv: list[str] | None = None) -> int:
     LoggerManager.configure(LoggerConfig(
         name="pyscripts",
         level="INFO",
-        log_dir="logs",
+        log_dir=ROOT_DIR / "logs",
         console=False,
         console_color=False,
         json_file=False,

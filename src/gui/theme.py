@@ -12,6 +12,8 @@ from PySide6.QtCore import QObject, Signal
 from PySide6.QtWidgets import QApplication
 from PySide6.QtGui import QPalette
 
+from . import ASSETS_DIR
+
 
 @dataclass(frozen=True)
 class ThemeTokens:
@@ -92,6 +94,10 @@ _DARK_DIFF = DiffColors(
     err_bg="#2E1515",
     err_fg="#FF7B7B",
 )
+
+
+_CHEVRON_DOWN = (ASSETS_DIR / "chevron-down.svg").as_posix()
+_CHECK = (ASSETS_DIR / "check.svg").as_posix()
 
 
 def stylesheet(t: ThemeTokens) -> str:
@@ -275,7 +281,7 @@ QComboBox:focus {{ border-color: {t.accent}; }}
 QComboBox::drop-down {{ border: none; width: 30px; }}
 QComboBox::down-arrow {{
     width: 12px; height: 12px;
-    image: url(assets/chevron-down.svg);
+    image: url({_CHEVRON_DOWN});
 }}
 QComboBox QAbstractItemView {{
     background: {t.surface};
@@ -308,7 +314,7 @@ QCheckBox::indicator {{
 QCheckBox::indicator:checked {{
     background: {t.accent};
     border-color: {t.accent};
-    image: url(assets/check.svg);
+    image: url({_CHECK});
 }}
 
 /* ── RunBtn ── */

@@ -3,13 +3,14 @@ from pathlib import Path
 from typing import Any, Optional
 
 from .logger import get_logger, log_exceptions
+from . import ROOT_DIR
 logger = get_logger(__name__)
 
 
 class JsonConfigStore:
     """Generic JSON-backed config store with nested key-path access."""
 
-    def __init__(self, config_dir: str = ".") -> None:
+    def __init__(self, config_dir: str | Path = ".") -> None:
         self.config_dir = Path(config_dir)
 
     @log_exceptions()
@@ -61,7 +62,7 @@ class ConfigManager(JsonConfigStore):
         "data_generator": {"distribution": "normal"},
     }
 
-    def __init__(self, config_dir: str = ".") -> None:
+    def __init__(self, config_dir: str | Path = ".") -> None:
         super().__init__(config_dir)
         self.app_file = self.config_dir / "app.json"
         self.history_file = self.config_dir / "history.json"
@@ -111,4 +112,4 @@ class ConfigManager(JsonConfigStore):
         self._set_nested(self.history, key_path, target_list)
 
 
-config_manager = ConfigManager(config_dir="config")
+config_manager = ConfigManager(config_dir=ROOT_DIR / "config")

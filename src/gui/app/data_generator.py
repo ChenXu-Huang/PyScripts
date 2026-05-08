@@ -15,6 +15,7 @@ from PySide6.QtGui import QCursor, QPixmap
 
 from ..i18n import tr, language_changed
 from ..widgets import SectionLabel, InputField
+from ... import ROOT_DIR
 from ...logger import get_logger
 from ...config import config_manager
 from ...utils.data_generator import generate_data
@@ -356,7 +357,7 @@ class ToolWidget(QWidget):
         seed_text = self._seed_field.text().strip()
         seed = int(seed_text) if seed_text else None
 
-        csv_path = self._export_edit.text().strip() or "data/random_data.csv"
+        csv_path = self._export_edit.text().strip() or str(ROOT_DIR / "data/random_data.csv")
         variance = std * std
         distribution = self._dist_combo.currentData()
 

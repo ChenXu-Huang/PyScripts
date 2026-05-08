@@ -1,10 +1,9 @@
 import json
-from pathlib import Path
 from PySide6.QtCore import QObject, Signal
 
+from . import LANG_DIR
 from ..config import config_manager
 
-_LANG_DIR = Path("lang")
 _STRINGS: dict[str, dict[str, str]] = {}
 
 
@@ -12,7 +11,7 @@ def _load_strings():
     """Dynamically load all language files from lang/ folder."""
     global _STRINGS
     _STRINGS = {}
-    for path in Path(_LANG_DIR).iterdir():
+    for path in LANG_DIR.iterdir():
         if path.is_file() and path.suffix == ".json":
             locale = path.stem
             with path.open(encoding="utf-8") as f:

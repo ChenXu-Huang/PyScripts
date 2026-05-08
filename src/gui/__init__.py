@@ -3,6 +3,11 @@
 import sys
 from typing import NoReturn
 
+from .. import ROOT_DIR
+
+ASSETS_DIR = ROOT_DIR / "assets"
+LANG_DIR = ROOT_DIR / "lang"
+
 
 def launch_gui() -> NoReturn:
     """Launch the main application window (Qt event loop)."""

@@ -121,7 +121,7 @@ def generate_data(
     distribution: str = "normal",
     decimals: int | None = 0,
     rng: np.random.Generator | None = None,
-    csv_path: str | Path = "data/random_data.csv",
+    csv_path: str | Path | None = None,
     dimension: int = 1,
     **kwargs: Any,
 ) -> np.ndarray:
@@ -145,7 +145,7 @@ def generate_data(
                   ``None`` = no rounding).
         rng: Optional NumPy random generator.
         csv_path: Export path for the CSV file (header ``"x"``
-                  for 1-D, ``"x,y"`` for 2-D). Default ``"data/random_data.csv"``.
+                  for 1-D, ``"x,y"`` for 2-D). ``None`` (default) skips export.
         dimension (int): ``1`` (default) for a 1-D array; ``2`` for a 2-D array
                          with columns ``(X, Y)``.
         slope (float): Linear coefficient *a* for Y generation (2-D only).
@@ -168,7 +168,8 @@ def generate_data(
     x = _generate_random(n, mean, width, variance, distribution, decimals, rng)
     result = _generate_linear(x, decimals, rng, **kwargs) if dimension == 2 else x
 
-    _export_csv(result, csv_path)
+    if csv_path is not None:
+        _export_csv(result, csv_path)
 
     logger.info("%s", summary(result))
     return result
