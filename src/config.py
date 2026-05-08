@@ -2,8 +2,9 @@ import json
 from pathlib import Path
 from typing import Any, Optional
 
-from .logger import get_logger, log_exceptions
 from . import ROOT_DIR
+from .logger import get_logger, log_exceptions
+
 logger = get_logger(__name__)
 
 
