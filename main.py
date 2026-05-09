@@ -1,4 +1,4 @@
-"""Application entry point — configures logging and delegates to CLI or GUI."""
+"""Application entry point — delegates to the CLI dispatcher (run_cli)."""
 
 import sys
 from typing import NoReturn

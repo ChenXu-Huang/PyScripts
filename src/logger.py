@@ -6,30 +6,30 @@ Trace ID / Request ID tracking.
 
 Features
 --------
-    - Thread-safe singleton initialization
-    - Structured JSON log output (recommended for production)
-    - Multi-handler support: Console / JSON file / plain text / error-only file
-    - Automatic log rotation (by size or time)
-    - Exception auto-capture decorator (@log_exceptions)
-    - ContextVar distributed tracing (trace_id / request_id)
-    - Colored console output, runtime level hot-reload
-    - Environment variable configuration
+- Thread-safe singleton initialization
+- Structured JSON log output (recommended for production)
+- Multi-handler support: Console / JSON file / plain text / error-only file
+- Automatic log rotation (by size or time)
+- Exception auto-capture decorator (@log_exceptions)
+- ContextVar distributed tracing (trace_id / request_id)
+- Colored console output, runtime level hot-reload
+- Environment variable configuration
 
 Quick Start
 -----------
-    >>> from src.logger import LoggerManager, LoggerConfig, get_logger, set_trace_id
-    >>> LoggerManager.configure(LoggerConfig(name="myapp", log_dir="logs", level="INFO"))
-    >>> logger = get_logger(__name__)
-    >>> logger.info("User logged in", extra={"user_id": 42})
+>>> from src.logger import LoggerManager, LoggerConfig, get_logger, set_trace_id
+>>> LoggerManager.configure(LoggerConfig(name="myapp", log_dir="logs", level="INFO"))
+>>> logger = get_logger(__name__)
+>>> logger.info("User logged in", extra={"user_id": 42})
 
 
 See Also
 --------
-    - LoggerManager.configure(): Initialize the logging system
-    - LoggerConfig: Log configuration dataclass
-    - log_exceptions: Exception capture decorator
-    - set_trace_id / set_request_id: Set tracing IDs
-    - get_context_ids: Get context IDs (for HTTP headers)
+- LoggerManager.configure(): Initialize the logging system
+- LoggerConfig: Log configuration dataclass
+- log_exceptions: Exception capture decorator
+- set_trace_id / set_request_id: Set tracing IDs
+- get_context_ids: Get context IDs (for HTTP headers)
 """
 
 __all__ = [
@@ -233,6 +233,7 @@ class LoggerConfig:
             LOG_NAME:          Defaults to "app".
             LOG_LEVEL:         Defaults to "INFO".
             LOG_DIR:           Defaults to None (no file output).
+            LOG_CONSOLE:       "1"=True, "0"=False, defaults to "1".
             LOG_JSON:          "1"=True, "0"=False, defaults to "1".
             LOG_TEXT:          "1"=True, "0"=False, defaults to "0".
             LOG_ERROR_FILE:    "1"=True, "0"=False, defaults to "0".

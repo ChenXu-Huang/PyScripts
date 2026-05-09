@@ -127,7 +127,7 @@ def generate_data(
 ) -> np.ndarray:
     """Generate a dataset with the specified statistics.
 
-    Uses the algorithm described in ``docs/data_generator_algorithm.md``.
+    Uses the algorithm described in ``docs/algorithm.md``.
     The returned array has *exactly* the requested mean and variance
     before rounding.
 
@@ -135,9 +135,9 @@ def generate_data(
     with an exact coefficient of determination *r_squared*.
 
     Parameters:
+        n: Number of data points to generate (must be > 1).
         mean: Target arithmetic mean.
         width: Total range width of the output data (must be > 0).
-        n: Number of data points to generate (must be > 1).
         variance: Target variance.
         distribution: Name of a registered sampler (e.g. ``"normal"``,
                       ``"uniform"``). See ``_SAMPLER_FUNCS``.

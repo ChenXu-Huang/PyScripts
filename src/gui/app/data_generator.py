@@ -37,9 +37,9 @@ class _WorkerSignals(QObject):
 class _DataWorker(threading.Thread):
     def __init__(
         self,
+        n: int,
         mean: float,
         width: float,
-        n: int,
         variance: float,
         distribution: str,
         decimals: int | None,
@@ -52,9 +52,9 @@ class _DataWorker(threading.Thread):
         decimals_y: int | None = None,
     ) -> None:
         super().__init__(daemon=True)
+        self.n = n
         self.mean = mean
         self.width = width
-        self.n = n
         self.variance = variance
         self.distribution = distribution
         self.decimals = decimals
