@@ -18,7 +18,8 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout artifact
+        uses: actions/checkout@v5
 
       - name: Install uv
         uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b
@@ -45,16 +46,37 @@ jobs:
           --windows-disable-console
           --assume-yes-for-downloads
           --enable-plugin=pyside6
-          --include-data-dir=assets=assets
-          --include-data-dir=lang=lang
           --output-dir=dist
           --output-filename=pyscripts
           --product-name=pyscripts
           --file-version=${{ env.CLEAN_VERSION }}
           main.py
 
+      - name: Setup MSVC command prompt
+        if: runner.os == 'Windows'
+        uses: step-security/msvc-dev-cmd@v1
+
+      - name: Compile launcher (Windows)
+        if: runner.os == 'Windows'
+        shell: bash
+        run: MSYS2_ARG_CONV_EXCL="*" cl /O2 /Fe:dist/pyscripts.exe /source-charset:utf-8 build/launcher.c
+
+      - name: Compile launcher (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            cc -O2 -o dist/pyscripts build/launcher.c
+          else
+            gcc -O2 -o dist/pyscripts build/launcher.c
+          fi
+
+      - name: Restructure package
+        shell: bash
+        run: ./build/restructure.sh
+
       - name: Upload artifact
         uses: actions/upload-artifact@v7
         with:
           name: pyscripts-${{ matrix.os }}-${{ github.ref_name }}
-          path: dist/main.dist/
+          path: dist/package/
